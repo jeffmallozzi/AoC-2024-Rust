@@ -32,6 +32,13 @@ fn sort_func(a: &str, b: &str, rules: HashMap<&str, HashSet<&str>>) -> std::cmp:
     std::cmp::Ordering::Equal
 }
 
+fn is_sort_func(a: &str, b: &str, rules: HashMap<&str, HashSet<&str>>) -> bool {
+    if rules.clone().entry(b).or_insert(HashSet::new()).contains(a) {
+        return false;
+    }
+    true
+}
+
 fn solution1(input: &str) -> (u64, u64) {
     let mut rules: HashMap<&str, HashSet<&str>> = HashMap::new();
     let mut manuals: Vec<Vec<&str>> = Vec::new();
@@ -53,25 +60,10 @@ fn solution1(input: &str) -> (u64, u64) {
     }
 
     for mut manual in manuals {
-        let mut valid: bool = true;
-        for (page_i, page) in enumerate(manual.clone()) {
-            let before_pages = HashSet::from_iter(manual.clone()[..page_i].iter().map(|p| *p));
-            if rules
-                .entry(page)
-                .or_insert(HashSet::new())
-                .intersection(&before_pages)
-                .collect::<Vec<_>>()
-                .len()
-                > 0
-            {
-                valid = false;
-                manual.sort_by(|a, b| sort_func(a, b, rules.clone()));
-            }
-        }
-
-        if valid {
+        if manual.is_sorted_by(|a, b| is_sort_func(a, b, rules.clone())) {
             middle_sum += middle_page(manual);
         } else {
+            manual.sort_by(|a, b| sort_func(a, b, rules.clone()));
             incorrect_sum += middle_page(manual)
         }
     }
