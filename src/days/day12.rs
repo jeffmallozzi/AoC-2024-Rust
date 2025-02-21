@@ -1,7 +1,6 @@
 use itertools::{enumerate, Product};
 
 use crate::{Solution, SolutionPair};
-use std::arch::x86_64::_MM_FROUND_TO_ZERO;
 use std::collections::{HashMap, HashSet};
 use std::fs::read_to_string;
 use std::ops::{Index, IndexMut};
@@ -19,6 +18,19 @@ pub fn solve() -> SolutionPair {
     (Solution::from(sol1), Solution::from(sol2))
 }
 
+impl<T> HashSet<T>
+where
+    T: std::hash::Hash + Eq,
+{
+    pub fn pop(&mut self) -> Option<T> {
+        if let Some(&item) = self.iter().next() {
+            self.take(&item)
+        } else {
+            None
+        }
+    }
+}
+
 #[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
 struct Location {
     x: usize,
@@ -31,9 +43,9 @@ struct Plot {
     crop: char,
 }
 
-#[derive(Debug, Hash, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct Region {
-    locations: Vec<Location>,
+    locations: HashSet<Location>,
     crop: char,
     area: usize,
     perimeter: usize,
@@ -42,7 +54,7 @@ struct Region {
 impl Region {
     fn new(plot: Plot) -> Self {
         Region {
-            locations: vec![plot.location],
+            locations: HashSet::from([plot.location]),
             crop: plot.crop,
             area: 1,
             perimeter: 4,
@@ -53,23 +65,24 @@ impl Region {
         self.area * self.perimeter
     }
 
-    fn grow(mut self, plots: &mut Vec<Plot>) -> Self {
+    fn grow(mut self, plots: &mut HashSet<Plot>) -> Self {
         let mut found: bool = true;
 
         while found {
             found = false;
-            for (i plot) in enumerate(plots) {
+            for plot in plots.clone() {
                 if plot.crop == self.crop {
-                    let neighborCount = 0;
-                    for location in self.locations {
+                    let mut neighbor_count = 0;
+                    for location in self.locations.clone() {
                         if neighbors(location, plot.location) {
-                            neighborCount += 1;
+                            neighbor_count += 1;
                         }
                     }
-                    if neighborCount > 0 {
+                    if neighbor_count > 0 {
+                        self.locations.insert(plot.location);
                         self.area += 1;
-                        self.perimeter += (4 - (2*neighborCount));
-                        plots.swap_remove()
+                        self.perimeter += (4 - (2 * neighbor_count));
+                        plots.remove(&plot);
                     }
                 }
             }
@@ -78,14 +91,24 @@ impl Region {
     }
 }
 
+fn neighbors(loc1: Location, loc2: Location) -> bool {
+    if (loc1.x.abs_diff(loc2.x) == 1 && loc1.y == loc2.y) {
+        return true;
+    }
+    if (loc1.y.abs_diff(loc2.y) == 1 && loc1.x == loc2.x) {
+        return true;
+    }
+    false
+}
+
 fn solution1(input: &str) -> usize {
     let mut regions: Vec<Region> = Vec::new();
 
-    let mut plots: Vec<Plot> = Vec::new();
+    let mut plots: HashSet<Plot> = HashSet::new();
 
     for (y, line) in enumerate(input.lines()) {
         for (x, crop) in enumerate(line.chars()) {
-            plots.push(Plot {
+            plots.insert(Plot {
                 location: Location { x, y },
                 crop,
             });
@@ -93,7 +116,7 @@ fn solution1(input: &str) -> usize {
     }
 
     while !plots.is_empty() {
-        let plot = plots.pop().unwrap();
+        let plot = plots.into_iter().collect().pop();
         let mut region = Region::new(plot);
         let region = region.grow(&mut plots);
         regions.push(region);
