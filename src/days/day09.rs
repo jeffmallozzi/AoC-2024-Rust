@@ -3,7 +3,7 @@ use regex::bytes::CaptureLocations;
 
 use crate::{Solution, SolutionPair};
 use std::{
-    arch::x86_64::_mm256_undefined_pd, borrow::Borrow, clone, collections::HashMap,
+    borrow::Borrow, clone, collections::HashMap,
     fs::read_to_string, iter::FilterMap, num::NonZeroUsize, str::SplitAsciiWhitespace,
 };
 

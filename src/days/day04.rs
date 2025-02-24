@@ -1,7 +1,7 @@
 use crate::{Solution, SolutionPair};
 use itertools::enumerate;
 use regex::Regex;
-use std::{arch::x86_64::_MM_EXCEPT_DENORM, char::REPLACEMENT_CHARACTER, fs::read_to_string};
+use std::{char::REPLACEMENT_CHARACTER, fs::read_to_string};
 
 ///////////////////////////////////////////////////////////////////////////////
 
