@@ -18,19 +18,6 @@ pub fn solve() -> SolutionPair {
     (Solution::from(sol1), Solution::from(sol2))
 }
 
-impl<T> HashSet<T>
-where
-    T: std::hash::Hash + Eq,
-{
-    pub fn pop(&mut self) -> Option<T> {
-        if let Some(&item) = self.iter().next() {
-            self.take(&item)
-        } else {
-            None
-        }
-    }
-}
-
 #[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
 struct Location {
     x: usize,
@@ -49,6 +36,7 @@ struct Region {
     crop: char,
     area: usize,
     perimeter: usize,
+    sides: usize,
 }
 
 impl Region {
@@ -58,6 +46,7 @@ impl Region {
             crop: plot.crop,
             area: 1,
             perimeter: 4,
+            sides: 4,
         }
     }
 
@@ -79,6 +68,7 @@ impl Region {
                         }
                     }
                     if neighbor_count > 0 {
+                        found = true;
                         self.locations.insert(plot.location);
                         self.area += 1;
                         self.perimeter += (4 - (2 * neighbor_count));
@@ -116,7 +106,8 @@ fn solution1(input: &str) -> usize {
     }
 
     while !plots.is_empty() {
-        let plot = plots.into_iter().collect().pop();
+        let plot = *plots.clone().iter().next().unwrap();
+        plots.remove(&plot);
         let mut region = Region::new(plot);
         let region = region.grow(&mut plots);
         regions.push(region);
