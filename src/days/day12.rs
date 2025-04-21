@@ -79,6 +79,10 @@ impl Region {
         }
         self
     }
+
+    fn sides(self) -> usize {
+        0
+    }
 }
 
 fn neighbors(loc1: Location, loc2: Location) -> bool {
@@ -89,6 +93,61 @@ fn neighbors(loc1: Location, loc2: Location) -> bool {
         return true;
     }
     false
+}
+
+fn enumerate_surrounding(loc: &Location, locations: &HashSet<Location>) -> Vec<usize> {
+    let mut result: Vec<usize> = Vec::new();
+
+    if locations.contains(&Location {
+        x: loc.x - 1,
+        y: loc.y - 1,
+    }) {
+        result.push(1);
+    }
+    if locations.contains(&Location {
+        x: loc.x,
+        y: loc.y - 1,
+    }) {
+        result.push(2);
+    }
+    if locations.contains(&Location {
+        x: loc.x + 1,
+        y: loc.y - 1,
+    }) {
+        result.push(3);
+    }
+    if locations.contains(&Location {
+        x: loc.x - 1,
+        y: loc.y,
+    }) {
+        result.push(4);
+    }
+    if locations.contains(&Location {
+        x: loc.x + 1,
+        y: loc.y,
+    }) {
+        result.push(5);
+    }
+    if locations.contains(&Location {
+        x: loc.x - 1,
+        y: loc.y + 1,
+    }) {
+        result.push(6);
+    }
+    if locations.contains(&Location {
+        x: loc.x,
+        y: loc.y + 1,
+    }) {
+        result.push(7);
+    }
+    if locations.contains(&Location {
+        x: loc.x + 1,
+        y: loc.y + 1,
+    }) {
+        result.push(8);
+    }
+
+    result
 }
 
 fn solution1(input: &str) -> usize {
