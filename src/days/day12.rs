@@ -36,7 +36,7 @@ struct Region {
     crop: char,
     area: usize,
     perimeter: usize,
-    sides: usize,
+    sides: isize,
 }
 
 impl Region {
@@ -120,34 +120,38 @@ fn enumerate_surrounding(loc: &Location, locations: &HashSet<Location>) -> Vec<u
         x: loc.x - 1,
         y: loc.y,
     }) {
-        result.push(4);
+        result.push(8);
     }
     if locations.contains(&Location {
         x: loc.x + 1,
         y: loc.y,
     }) {
-        result.push(5);
+        result.push(4);
     }
     if locations.contains(&Location {
         x: loc.x - 1,
         y: loc.y + 1,
     }) {
-        result.push(6);
+        result.push(7);
     }
     if locations.contains(&Location {
         x: loc.x,
         y: loc.y + 1,
     }) {
-        result.push(7);
+        result.push(6);
     }
     if locations.contains(&Location {
         x: loc.x + 1,
         y: loc.y + 1,
     }) {
-        result.push(8);
+        result.push(5);
     }
 
     result
+}
+
+fn side_delta(suround: Vec<usize>) -> isize {
+    0
 }
 
 fn solution1(input: &str) -> usize {
