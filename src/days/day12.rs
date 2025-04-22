@@ -3,7 +3,6 @@ use itertools::{all, enumerate, Product};
 use crate::{Solution, SolutionPair};
 use std::collections::{HashMap, HashSet};
 use std::fs::read_to_string;
-use std::isize;
 use std::ops::{Index, IndexMut};
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,7 +157,7 @@ fn enumerate_surrounding(loc: &Location, locations: &HashSet<Location>) -> Vec<i
 }
 
 fn side_delta(mut suround: Vec<isize>) -> isize {
-    if all([2, 3, 6, 8], |n| suround.contains(&n)) {
+    if all([2, 4, 6, 8], |n| suround.contains(&n)) {
         return -4;
     }
 
@@ -168,7 +167,7 @@ fn side_delta(mut suround: Vec<isize>) -> isize {
 
     if all([4, 6, 8], |n| !suround.contains(&n)) {
         if suround.contains(&1) && suround.contains(&3) {
-            return 3;
+            return 4;
         }
 
         if !suround.contains(&1) && !suround.contains(&3) {
