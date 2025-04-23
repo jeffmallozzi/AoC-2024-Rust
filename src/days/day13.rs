@@ -1,5 +1,7 @@
 use crate::{Solution, SolutionPair};
-use std::fs::read_to_string;
+use itertools::Itertools;
+use regex::Regex;
+use std::{collections::HashSet, fs::read_to_string};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -14,10 +16,51 @@ pub fn solve() -> SolutionPair {
     (Solution::from(sol1), Solution::from(sol2))
 }
 
-fn solution1(input: &str) -> usize {
-    for line in input.lines() {
-        println!("{}", line);
+#[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
+struct Combo {
+    a: usize,
+    b: usize,
+}
+
+impl Combo {
+    fn tokens(self) -> usize {
+        (self.a * 3) + self.b
+    }
+}
+
+fn find_combos(a: usize, b: usize, value: usize) -> Option<HashSet<Combo>> {
+    let mut combos: HashSet<Combo> = HashSet::new();
+
+    for (presses_a, presses_b) in (1..(value / a)).cartesian_product(1..value / b) {
+        if (a * presses_a) + (b * presses_b) == value {
+            combos.insert(Combo {
+                a: presses_a,
+                b: presses_b,
+            });
+        }
     }
 
-    0
+    if combos.is_empty() {
+        return None;
+    }
+
+    Some(combos)
+}
+
+fn solution1(input: &str) -> usize {
+    let mut total_tokens = 0;
+    let mut ax = 0;
+    let mut ay = 0;
+    let mut bx = 0;
+    let mut by = 0;
+    let mut x = 0;
+    let mut y = 0;
+
+    let button_regex = Regex::new(r"Button [A,B]: X\+([0-9]+), Y\+([0-9]+) ");
+
+    for line in input.lines() {
+        if line.starts_with("Button A: ") {}
+    }
+
+    total_tokens
 }
