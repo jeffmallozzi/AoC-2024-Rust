@@ -13,22 +13,22 @@ pub fn solve() -> SolutionPair {
     let input_file = "input/day13".to_string();
     let input = read_to_string(input_file).expect("bad path");
 
-    let sol1: usize = solution1(&input);
+    let sol1: (isize, isize) = solution1(&input);
     let sol2: u64 = 0;
 
-    (Solution::from(sol1), Solution::from(sol2))
+    (Solution::from(sol1.0), Solution::from(sol1.1))
 }
 
 #[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
 struct Location {
-    x: usize,
-    y: usize,
+    x: isize,
+    y: isize,
 }
 
 #[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
 struct Moves {
-    move_x: usize,
-    move_y: usize,
+    move_x: isize,
+    move_y: isize,
 }
 
 #[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
@@ -39,7 +39,7 @@ struct Machine {
 }
 
 impl Machine {
-    fn new(ax: usize, ay: usize, bx: usize, by: usize, px: usize, py: usize) -> Self {
+    fn new(ax: isize, ay: isize, bx: isize, by: isize, px: isize, py: isize) -> Self {
         Self {
             button_a: Moves {
                 move_x: ax,
@@ -53,60 +53,41 @@ impl Machine {
         }
     }
 
-    fn valid_combos(&self) -> HashSet<Combo> {
-        find_combos(
-            self.button_a.move_x,
-            self.button_b.move_x,
-            self.prize_location.x,
-        )
-        .intersection(&find_combos(
-            self.button_a.move_y,
-            self.button_b.move_y,
-            self.prize_location.y,
-        ))
-        .cloned()
-        .collect()
-    }
-}
+    fn least_tokens(&self) -> isize {
+        // Stolen from the reddit comment: https://www.reddit.com/r/adventofcode/comments/1hd4wda/comment/m32wabe/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 
-#[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
-struct Combo {
-    presses_a: usize,
-    presses_b: usize,
-}
+        let t1 = (self.button_b.move_x * self.prize_location.y)
+            - (self.button_b.move_y * self.prize_location.x);
+        let t2 = (self.button_b.move_x * self.button_a.move_y)
+            - (self.button_b.move_y * self.button_a.move_x);
 
-impl Combo {
-    fn tokens(self) -> usize {
-        (self.presses_a * 3) + self.presses_b
-    }
-}
-
-fn find_combos(a: usize, b: usize, value: usize) -> HashSet<Combo> {
-    let mut combos: HashSet<Combo> = HashSet::new();
-
-    for (presses_a, presses_b) in (0..((value / a) + 1)).cartesian_product(0..(value / b) + 1) {
-        if (a * presses_a) + (b * presses_b) == value {
-            combos.insert(Combo {
-                presses_a,
-                presses_b,
-            });
+        if t1 % t2 != 0 {
+            return 0;
         }
-    }
 
-    //println!("Combos: {:?}", combos);
-    combos
+        let ak = t1 / t2;
+
+        let t3 = self.prize_location.x - (self.button_a.move_x * ak);
+
+        if t3 % self.button_b.move_x != 0 {
+            return 0;
+        }
+
+        let bk = t3 / self.button_b.move_x;
+
+        (ak * 3) + bk
+    }
 }
 
-fn solution1(input: &str) -> usize {
-    let mut total_tokens = 0;
+fn solution1(input: &str) -> (isize, isize) {
+    let mut total_tokens_part1 = 0;
+    let mut total_tokens_part2 = 0;
     let mut machine_count = 0;
 
     let machine_re = Regex::new(r"Button A: X\+(?P<ax>[0-9]+), Y\+(?P<ay>[0-9]+)\nButton B: X\+(?P<bx>[0-9]+), Y\+(?P<by>[0-9]+)\nPrize: X=(?P<px>[0-9]+), Y=(?P<py>[0-9]+)").expect("Hey!");
 
     for captures in machine_re.captures_iter(input) {
-        machine_count += 1;
-
-        let machine: Machine = Machine::new(
+        let mut machine: Machine = Machine::new(
             captures["ax"].parse().expect("Hey"),
             captures["ay"].parse().expect("Hey"),
             captures["bx"].parse().expect("Hey"),
@@ -115,17 +96,13 @@ fn solution1(input: &str) -> usize {
             captures["py"].parse().expect("Hey"),
         );
 
-        //println!("Machine: {:?}", machine);
-        total_tokens += machine
-            .valid_combos()
-            .iter()
-            .map(|c| c.tokens())
-            .min()
-            .unwrap_or(0);
-        print!("Running Total: {} ", total_tokens);
+        total_tokens_part1 += machine.least_tokens();
+
+        machine.prize_location.x += 10000000000000;
+        machine.prize_location.y += 10000000000000;
+
+        total_tokens_part2 += machine.least_tokens();
     }
 
-    println!("Total Machines: {}", machine_count);
-
-    total_tokens
+    (total_tokens_part1, total_tokens_part2)
 }
