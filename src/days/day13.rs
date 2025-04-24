@@ -84,7 +84,7 @@ impl Combo {
 fn find_combos(a: usize, b: usize, value: usize) -> HashSet<Combo> {
     let mut combos: HashSet<Combo> = HashSet::new();
 
-    for (presses_a, presses_b) in (1..(value / a)).cartesian_product(1..value / b) {
+    for (presses_a, presses_b) in (0..((value / a) + 1)).cartesian_product(0..(value / b) + 1) {
         if (a * presses_a) + (b * presses_b) == value {
             combos.insert(Combo {
                 presses_a,
@@ -93,14 +93,19 @@ fn find_combos(a: usize, b: usize, value: usize) -> HashSet<Combo> {
         }
     }
 
+    //println!("Combos: {:?}", combos);
     combos
 }
 
 fn solution1(input: &str) -> usize {
     let mut total_tokens = 0;
+    let mut machine_count = 0;
+
     let machine_re = Regex::new(r"Button A: X\+(?P<ax>[0-9]+), Y\+(?P<ay>[0-9]+)\nButton B: X\+(?P<bx>[0-9]+), Y\+(?P<by>[0-9]+)\nPrize: X=(?P<px>[0-9]+), Y=(?P<py>[0-9]+)").expect("Hey!");
 
     for captures in machine_re.captures_iter(input) {
+        machine_count += 1;
+
         let machine: Machine = Machine::new(
             captures["ax"].parse().expect("Hey"),
             captures["ay"].parse().expect("Hey"),
@@ -110,13 +115,17 @@ fn solution1(input: &str) -> usize {
             captures["py"].parse().expect("Hey"),
         );
 
+        //println!("Machine: {:?}", machine);
         total_tokens += machine
             .valid_combos()
             .iter()
             .map(|c| c.tokens())
             .min()
             .unwrap_or(0);
+        print!("Running Total: {} ", total_tokens);
     }
+
+    println!("Total Machines: {}", machine_count);
 
     total_tokens
 }
