@@ -1,6 +1,6 @@
 use crate::{Solution, SolutionPair};
 use regex::Regex;
-use std::{fs::read_to_string, intrinsics::ptr_offset_from_unsigned};
+use std::fs::read_to_string;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -9,22 +9,33 @@ pub fn solve() -> SolutionPair {
     let input_file = "input/day14".to_string();
     let input = read_to_string(input_file).expect("Bad File");
 
-    let sol1: u64 = 0;
+    let sol1: isize = solution1(&input);
     let sol2: u64 = 0;
 
     (Solution::from(sol1), Solution::from(sol2))
 }
 
+#[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
+enum Quadrant {
+    One,
+    Two,
+    Three,
+    Four,
+}
+
+#[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
 struct Location {
     x: isize,
     y: isize,
 }
 
+#[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
 struct Volocity {
     x: isize,
     y: isize,
 }
 
+#[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
 struct Robot {
     location: Location,
     volocity: Volocity,
@@ -36,8 +47,45 @@ impl Robot {
     }
 
     fn walk(mut self) {
-        self.location.x = (self.location.x + self.volocity.x) % 101;
-        self.location.y = (self.location.y + self.volocity.y) % 103;
+        print!(
+            "Start location {:?}, Volocity {:?} - ",
+            self.location, self.volocity
+        );
+        self.location.x += self.volocity.x;
+        self.location.y += self.volocity.y;
+
+        if self.location.x < 0 {
+            self.location.x += 102;
+        }
+        if self.location.y < 0 {
+            self.location.y += 104;
+        }
+
+        if self.location.x > 101 {
+            self.location.x -= 101;
+        }
+        if self.location.y > 103 {
+            self.location.y -= 103;
+        }
+
+        println!("End location {:?}", self.location);
+    }
+
+    fn quadrant(self) -> Option<Quadrant> {
+        if self.location.x < 50 && self.location.y < 51 {
+            return Some(Quadrant::One);
+        }
+        if self.location.x < 50 && self.location.y > 51 {
+            return Some(Quadrant::Two);
+        }
+        if self.location.x > 50 && self.location.y < 51 {
+            return Some(Quadrant::Three);
+        }
+        if self.location.x > 50 && self.location.y > 51 {
+            return Some(Quadrant::Four);
+        }
+
+        None
     }
 }
 
@@ -63,9 +111,7 @@ fn solution1(input: &str) -> isize {
     }
 
     for i in (0..100) {
-        for robot in robots {
-            robot.walk();
-        }
+        robots.iter_mut().for_each(|r| r.walk());
     }
 
     let mut quad_1 = 0;
@@ -74,18 +120,12 @@ fn solution1(input: &str) -> isize {
     let mut quad_4 = 0;
 
     for robot in robots {
-        if robot.location.x < 50 {
-            if robot.location.y < 51 {
-                quad_1 += 1;
-            } else if robot.location.y > 51 {
-                quad_2 += 1;
-            }
-        } else if robot.location.x > 50 {
-            if robot.location.y < 51 {
-                quad_3 += 1;
-            } else if robot.location.y > 51 {
-                quad_4 += 1;
-            }
+        match robot.quadrant() {
+            Some(Quadrant::One) => quad_1 += 1,
+            Some(Quadrant::Two) => quad_2 += 1,
+            Some(Quadrant::Three) => quad_3 += 1,
+            Some(Quadrant::Four) => quad_4 += 1,
+            None => (),
         }
     }
 
