@@ -46,29 +46,30 @@ impl Robot {
         Self { location, volocity }
     }
 
-    fn walk(mut self) {
+    fn walk(mut self, steps: isize) -> Self {
         print!(
             "Start location {:?}, Volocity {:?} - ",
             self.location, self.volocity
         );
-        self.location.x += self.volocity.x;
-        self.location.y += self.volocity.y;
+        self.location.x += (self.volocity.x * steps);
+        self.location.y += (self.volocity.y * steps);
 
-        if self.location.x < 0 {
-            self.location.x += 102;
+        while self.location.x < 0 {
+            self.location.x += 101;
         }
-        if self.location.y < 0 {
-            self.location.y += 104;
+        while self.location.y < 0 {
+            self.location.y += 103;
         }
 
-        if self.location.x > 101 {
+        while self.location.x > 100 {
             self.location.x -= 101;
         }
-        if self.location.y > 103 {
+        while self.location.y > 102 {
             self.location.y -= 103;
         }
 
         println!("End location {:?}", self.location);
+        self
     }
 
     fn quadrant(self) -> Option<Quadrant> {
@@ -110,16 +111,18 @@ fn solution1(input: &str) -> isize {
         ));
     }
 
-    for i in (0..100) {
-        robots.iter_mut().for_each(|r| r.walk());
-    }
+    let mut robots_final: Vec<Robot> = Vec::new();
+    robots
+        .iter_mut()
+        .for_each(|r| robots_final.push(r.walk(100)));
 
     let mut quad_1 = 0;
     let mut quad_2 = 0;
     let mut quad_3 = 0;
     let mut quad_4 = 0;
 
-    for robot in robots {
+    for robot in robots_final {
+        println!("Robot location: {:?}", robot.location);
         match robot.quadrant() {
             Some(Quadrant::One) => quad_1 += 1,
             Some(Quadrant::Two) => quad_2 += 1,
