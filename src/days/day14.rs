@@ -1,6 +1,6 @@
 use crate::{Solution, SolutionPair};
 use regex::Regex;
-use std::fs::read_to_string;
+use std::{fs::read_to_string, thread::sleep, time};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -46,11 +46,11 @@ impl Robot {
         Self { location, volocity }
     }
 
-    fn walk(mut self, steps: isize) -> Self {
-        print!(
-            "Start location {:?}, Volocity {:?} - ",
-            self.location, self.volocity
-        );
+    fn walk(&mut self, steps: isize) {
+        //print!(
+        //    "Start location {:?}, Volocity {:?} - ",
+        //    self.location, self.volocity
+        //);
         self.location.x += (self.volocity.x * steps);
         self.location.y += (self.volocity.y * steps);
 
@@ -68,11 +68,10 @@ impl Robot {
             self.location.y -= 103;
         }
 
-        println!("End location {:?}", self.location);
-        self
+        //println!("End location {:?}", self.location);
     }
 
-    fn quadrant(self) -> Option<Quadrant> {
+    fn quadrant(&self) -> Option<Quadrant> {
         if self.location.x < 50 && self.location.y < 51 {
             return Some(Quadrant::One);
         }
@@ -88,6 +87,36 @@ impl Robot {
 
         None
     }
+}
+
+fn display_robots(robots: &Vec<Robot>) {
+    for y in (0..102) {
+        for x in (0..100) {
+            let mut found = false;
+            for robot in robots {
+                if robot.location.x == x && robot.location.y == y {
+                    found = true;
+                    print!("X");
+                    break;
+                }
+            }
+            if !found {
+                print!(" ");
+            }
+        }
+        println!("");
+    }
+    //print!("{}[2J", 27 as char);
+
+    //for robot in robots {
+    //    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+
+    //    let row = robot.location.y;
+    //    let col = robot.location.x;
+
+    //    print!("{esc}[2J{esc}[{r};{c}H", esc = 27 as char, r = row, c = col);
+    //    print!("R");
+    //}
 }
 
 fn solution1(input: &str) -> isize {
@@ -111,18 +140,26 @@ fn solution1(input: &str) -> isize {
         ));
     }
 
-    let mut robots_final: Vec<Robot> = Vec::new();
-    robots
-        .iter_mut()
-        .for_each(|r| robots_final.push(r.walk(100)));
+    //let mut robots_final: Vec<Robot> = Vec::new();
+    //robots
+    //    .iter_mut()
+    //   .for_each(|r| robots_final.push(r.walk(100)));
+    //
+    //let mut robot_display: Vec<Vec<char>> = Vec::new();
+    for step in (1..1000) {
+        robots.iter_mut().for_each(|r| r.walk(1));
+        display_robots(&robots);
+        println!("{}", step);
+        sleep(time::Duration::from_millis(500));
+    }
 
     let mut quad_1 = 0;
     let mut quad_2 = 0;
     let mut quad_3 = 0;
     let mut quad_4 = 0;
 
-    for robot in robots_final {
-        println!("Robot location: {:?}", robot.location);
+    for robot in robots {
+        //println!("Robot location: {:?}", robot.location);
         match robot.quadrant() {
             Some(Quadrant::One) => quad_1 += 1,
             Some(Quadrant::Two) => quad_2 += 1,
