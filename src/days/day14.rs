@@ -146,28 +146,39 @@ fn solution1(input: &str) -> isize {
     //   .for_each(|r| robots_final.push(r.walk(100)));
     //
     //let mut robot_display: Vec<Vec<char>> = Vec::new();
-    for step in (1..1000) {
+
+    let mut result: isize = 0;
+    for step in (1..10000) {
         robots.iter_mut().for_each(|r| r.walk(1));
-        display_robots(&robots);
-        println!("{}", step);
-        sleep(time::Duration::from_millis(500));
-    }
+        //display_robots(&robots);
+        //println!("{}", step);
+        //sleep(time::Duration::from_millis(250));
 
-    let mut quad_1 = 0;
-    let mut quad_2 = 0;
-    let mut quad_3 = 0;
-    let mut quad_4 = 0;
+        let mut quad_1 = 0;
+        let mut quad_2 = 0;
+        let mut quad_3 = 0;
+        let mut quad_4 = 0;
 
-    for robot in robots {
-        //println!("Robot location: {:?}", robot.location);
-        match robot.quadrant() {
-            Some(Quadrant::One) => quad_1 += 1,
-            Some(Quadrant::Two) => quad_2 += 1,
-            Some(Quadrant::Three) => quad_3 += 1,
-            Some(Quadrant::Four) => quad_4 += 1,
-            None => (),
+        for robot in robots.clone() {
+            //println!("Robot location: {:?}", robot.location);
+            match robot.quadrant() {
+                Some(Quadrant::One) => quad_1 += 1,
+                Some(Quadrant::Two) => quad_2 += 1,
+                Some(Quadrant::Three) => quad_3 += 1,
+                Some(Quadrant::Four) => quad_4 += 1,
+                None => (),
+            }
+        }
+
+        let safty_factor = quad_1 * quad_2 * quad_3 * quad_4;
+        if step == 100 {
+            result = safty_factor
+        }
+
+        if safty_factor < 50000000 {
+            display_robots(&robots);
+            println!("{step}");
         }
     }
-
-    quad_1 * quad_2 * quad_3 * quad_4
+    result
 }
